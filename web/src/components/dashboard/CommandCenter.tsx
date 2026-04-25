@@ -38,7 +38,7 @@ export const CommandCenter = ({
   isStakingEnabled,
 }: CommandCenterProps) => {
   const { address } = useAccount()
-  const chartData = [40, 70, 45, 90, 65, 80, 50, 85, 40, 60, 75, 95]
+  const chartDataFallback = [10, 20, 15, 30, 25, 40, 35, 50, 45, 60, 55, 70]
 
   // --- Contract Reads ---
   const { data: vaultBalance } = useReadContract({
@@ -278,31 +278,47 @@ export const CommandCenter = ({
               </div>
             </div>
             <div className="h-64 flex items-end gap-2 md:gap-4 px-2">
-              {chartData.map((val, i) => (
-                <motion.div
-                  key={i}
-                  initial={{ height: 0 }}
-                  animate={{ height: `${val}%` }}
-                  transition={{
-                    delay: i * 0.05,
-                    duration: 0.8,
-                    ease: 'circOut',
+              <Suspense fallback={<div className="text-[10px] uppercase opacity-50">Loading_Data...</div>}>
+                <Await promise={deferredDonations}>
+                  {(donations: any[]) => {
+                    const latestDonations = donations?.slice(0, 12).reverse() || []
+                    const maxAmount = Math.max(...latestDonations.map(d => Number(d.amount)), 1)
+                    
+                    // If no donations, show empty states or fallback
+                    if (latestDonations.length === 0) {
+                      return chartDataFallback.map((val, i) => (
+                        <div key={i} className="flex-1 bg-white/5 relative" style={{ height: `${val}%` }} />
+                      ))
+                    }
+
+                    return latestDonations.map((d, i) => {
+                      const heightPercent = (Number(d.amount) / maxAmount) * 100
+                      return (
+                        <motion.div
+                          key={d.id || i}
+                          initial={{ height: 0 }}
+                          animate={{ height: `${heightPercent}%` }}
+                          transition={{
+                            delay: i * 0.05,
+                            duration: 0.8,
+                            ease: 'circOut',
+                          }}
+                          className="flex-1 bg-linear-to-t from-neon-cyan/10 via-neon-cyan/40 to-neon-cyan relative group/bar"
+                        >
+                          <div className="absolute -top-6 left-1/2 -translate-x-1/2 text-[8px] font-mono text-neon-cyan opacity-0 group-hover/bar:opacity-100 transition-opacity whitespace-nowrap">
+                            {d.amount} MON
+                          </div>
+                          <div className="absolute inset-0 bg-white opacity-0 group-hover/bar:opacity-20 transition-opacity" />
+                        </motion.div>
+                      )
+                    })
                   }}
-                  className="flex-1 bg-linear-to-t from-neon-cyan/10 via-neon-cyan/40 to-neon-cyan relative group/bar"
-                >
-                  <div className="absolute -top-6 left-1/2 -translate-x-1/2 text-[8px] font-mono text-neon-cyan opacity-0 group-hover/bar:opacity-100 transition-opacity whitespace-nowrap">
-                    VAL_{val}
-                  </div>
-                  <div className="absolute inset-0 bg-white opacity-0 group-hover/bar:opacity-20 transition-opacity" />
-                </motion.div>
-              ))}
+                </Await>
+              </Suspense>
             </div>
             <div className="flex justify-between mt-4 text-[8px] font-mono text-neutral-600 uppercase tracking-widest px-2">
-              <span>00:00</span>
-              <span>06:00</span>
-              <span>12:00</span>
-              <span>18:00</span>
-              <span>23:59</span>
+              <span>Oldest_Recent</span>
+              <span>Latest_Donation</span>
             </div>
           </div>
         </div>
