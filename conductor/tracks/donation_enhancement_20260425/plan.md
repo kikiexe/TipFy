@@ -2,7 +2,7 @@
 
 ## Phase 1: Verification Logic
 - [x] Task: Database Schema Update (f2ce764)
-- [ ] Task: Implement Monad RPC verification utility
+- [x] Task: Implement Monad RPC verification utility (a4fb7f2)
     - [ ] Create a utility in `web/src/lib/monad-utils.ts` to check transaction status using `viem`.
     - [ ] Add unit tests for the verification utility.
 - [ ] Task: Integrate verification into `record.ts` API
