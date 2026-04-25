@@ -142,7 +142,8 @@ export const CommandCenter = ({
         <div className="flex gap-4">
           {user?.slug && (
             <Link
-              to={`/u/${user.slug}`}
+              to="/u/$username"
+              params={{ username: user.slug }}
               className="px-6 py-3 bg-white/5 border border-white/10 hover:border-neon-cyan/50 transition-all uppercase text-[10px] font-black tracking-[0.2em] flex items-center gap-2 skew-x--10"
             >
               <span className="skew-x-10 flex items-center gap-2">

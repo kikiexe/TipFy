@@ -40,7 +40,7 @@ export const Route = createFileRoute('/dashboard')({
     
     // Stats and donations can be streamed
     const statsPromise = getDashboardStatsServerFn()
-    const donationsPromise = getDonationsServerFn()
+    const donationsPromise = getDonationsServerFn({ data: {} })
     
     return { 
       wallet, 
