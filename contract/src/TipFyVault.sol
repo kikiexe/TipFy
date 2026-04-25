@@ -87,6 +87,7 @@ contract TipFyVault is Ownable, ReentrancyGuard {
     // =========================================================
 
     function setAavePool(address _aavePool) external onlyOwner {
+        require(totalStreamerBalances == 0, "Cannot change pool while users are staking");
         aavePool = IPool(_aavePool);
     }
 
