@@ -57,12 +57,12 @@ export const getLatestDonationServerFn = createServerFn({
     return latest || null
   })
 
-export const getDonationsServerFn = createServerFn({ method: 'GET' }).handler(
-  async (): Promise<any[]> => {
+export const getDonationsServerFn = createServerFn({ method: 'GET' })
+  .inputValidator(z.object({ limit: z.number().optional(), offset: z.number().optional() }))
+  .handler(async ({ data: { limit, offset } }: { data: { limit?: number, offset?: number } }) => {
     const { getDonations } = await import('./db-actions.server')
-    return await getDonations()
-  },
-)
+    return await getDonations(limit, offset)
+  })
 
 export const getDashboardStatsServerFn = createServerFn({
   method: 'GET',

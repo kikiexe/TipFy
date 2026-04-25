@@ -6,20 +6,46 @@ import { getDonationsServerFn } from '../../lib/overlay-utils'
 export const TransmissionLog = () => {
   const [donations, setDonations] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
+  const [loadingMore, setLoadingMore] = useState(false)
+  const [hasMore, setHasMore] = useState(true)
+  const [offset, setOffset] = useState(0)
+  const LIMIT = 10
+
+  const fetchDonations = async (currentOffset: number, isInitial: boolean) => {
+    try {
+      if (isInitial) setLoading(true)
+      else setLoadingMore(true)
+
+      const data = await (getDonationsServerFn as any)({
+        data: { limit: LIMIT, offset: currentOffset }
+      })
+      
+      if (data.length < LIMIT) {
+        setHasMore(false)
+      }
+
+      if (isInitial) {
+        setDonations(data)
+      } else {
+        setDonations(prev => [...prev, ...data])
+      }
+    } catch (err) {
+      console.error('Fetch donations failed:', err)
+    } finally {
+      setLoading(false)
+      setLoadingMore(false)
+    }
+  }
 
   useEffect(() => {
-    const fetchDonations = async () => {
-      try {
-        const data = await (getDonationsServerFn as any)()
-        setDonations(data)
-      } catch (err) {
-        console.error('Fetch donations failed:', err)
-      } finally {
-        setLoading(false)
-      }
-    }
-    fetchDonations()
+    fetchDonations(0, true)
   }, [])
+
+  const handleLoadMore = () => {
+    const nextOffset = offset + LIMIT
+    setOffset(nextOffset)
+    fetchDonations(nextOffset, false)
+  }
 
   if (loading) {
     return (
@@ -67,7 +93,7 @@ export const TransmissionLog = () => {
             key={item.id}
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: idx * 0.05 }}
+            transition={{ delay: (idx % LIMIT) * 0.05 }}
             className="p-6 bg-white/2 border border-white/5 flex flex-col md:flex-row justify-between items-start md:items-center gap-6 group hover:border-neon-pink/30 transition-all skew-x--2"
           >
             <div className="flex items-center gap-4 skew-x-2">
@@ -110,6 +136,16 @@ export const TransmissionLog = () => {
           </motion.div>
         ))}
       </div>
+
+      {hasMore && (
+        <button
+          onClick={handleLoadMore}
+          disabled={loadingMore}
+          className="w-full py-4 bg-white/2 border border-white/5 hover:border-neon-pink/30 text-[10px] font-black uppercase tracking-[0.4em] transition-all skew-x--10 flex items-center justify-center gap-2"
+        >
+          {loadingMore ? 'Syncing_More_Data...' : 'Fetch_Older_Transmissions'}
+        </button>
+      )}
     </motion.div>
   )
 }

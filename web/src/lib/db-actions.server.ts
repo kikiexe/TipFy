@@ -195,14 +195,15 @@ export async function getDashboardStats() {
   }
 }
 
-export async function getDonations() {
+export async function getDonations(limit = 50, offset = 0) {
   const userContext = await getSessionUser()
   if (!userContext || !userContext.profile) return []
 
   return await db.query.donation.findMany({
     where: eq(donation.profileId, userContext.profile.id),
     orderBy: [desc(donation.createdAt)],
-    limit: 50,
+    limit,
+    offset,
   })
 }
 
