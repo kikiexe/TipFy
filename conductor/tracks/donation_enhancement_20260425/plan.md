@@ -11,10 +11,10 @@
     - [ ] Write integration tests for the `record` endpoint.
 - [x] Task: Conductor - User Manual Verification 'Phase 1: Verification Logic' (27208c9)
 
-## Phase 2: Robust Alerts
+## Phase 2: Robust Alerts [checkpoint: f488168]
 - [x] Task: Refactor Ably publishing logic (6f9f6dd)
     - [ ] Move Ably publishing to a central utility in `web/src/lib/ably-utils.ts`.
     - [ ] Implement error handling and logging for publication failures.
 - [x] Task: Update Overlays for Reliability (90d5773)
     - [ ] Add basic reconnection logic or status indicators to the widget page in `$type.$address.tsx`.
-- [ ] Task: Conductor - User Manual Verification 'Phase 2: Robust Alerts' (Protocol in workflow.md)
+- [x] Task: Conductor - User Manual Verification 'Phase 2: Robust Alerts' (f488168)
