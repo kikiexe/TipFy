@@ -10,9 +10,8 @@ const config = createConfig(
   getDefaultConfig({
     walletConnectProjectId: projectId,
     appName: 'Tipfy Protocol',
-    chains: [mainnet, monadTestnet],
+    chains: [monadTestnet],
     transports: {
-      [mainnet.id]: http('https://cloudflare-eth.com'),
       [monadTestnet.id]: http(),
     },
   }),
