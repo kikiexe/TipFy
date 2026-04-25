@@ -4,6 +4,8 @@ import { db } from '#/db/index'
 import { donation } from '#/db/schema'
 import { censorMessageServerFn } from '../../../lib/ai-utils'
 import { verifyMonadTransaction } from '#/lib/monad-utils'
+import { parseEther } from 'viem'
+import { TIPFY_VAULT_ADDRESS } from '#/lib/TipFyVaultABI'
 
 const donationSchema = z.object({
   slug: z.string(),
@@ -53,6 +55,23 @@ export const Route = createFileRoute('/api/donation/record')({
                 verification 
               }),
               { status: 400 },
+            )
+          }
+
+          // Strict Security Check: Verify Destination
+          if (verification.to?.toLowerCase() !== TIPFY_VAULT_ADDRESS.toLowerCase()) {
+            return new Response(
+              JSON.stringify({ error: 'Security Alert: Transaction destination does not match TipFy Vault' }),
+              { status: 403 },
+            )
+          }
+
+          // Strict Security Check: Verify Amount
+          const expectedAmountWei = parseEther(amount)
+          if (BigInt(verification.value || 0) < expectedAmountWei) {
+            return new Response(
+              JSON.stringify({ error: 'Security Alert: Transaction value is less than reported donation amount' }),
+              { status: 403 },
             )
           }
 

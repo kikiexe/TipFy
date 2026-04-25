@@ -12,9 +12,15 @@ export async function verifyMonadTransaction(hash: string) {
       hash: hash as `0x${string}`,
     })
 
+    const tx = await client.getTransaction({
+      hash: hash as `0x${string}`,
+    })
+
     return {
       status: receipt.status === 'success' ? 'confirmed' : 'failed',
       blockNumber: receipt.blockNumber.toString(),
+      to: tx.to,
+      value: tx.value,
     }
   } catch (error) {
     if (error instanceof Error && error.message.includes('Transaction not found')) {
