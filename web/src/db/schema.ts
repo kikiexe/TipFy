@@ -56,6 +56,8 @@ export const donation = pgTable('donation', {
   currency: varchar('currency', { length: 10 }).default('MON'),
   txHash: varchar('tx_hash', { length: 66 }).notNull().unique(),
   senderAddress: varchar('sender_address', { length: 42 }),
+  status: varchar('status', { length: 20 }).default('pending').notNull(), // 'pending', 'confirmed', 'failed'
+  blockNumber: text('block_number'),
   createdAt: timestamp('created_at').defaultNow().notNull(),
 })
 
