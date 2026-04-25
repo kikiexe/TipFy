@@ -153,7 +153,7 @@ function MenuLink({ to, icon, label, color, onClick }: { to: string, icon: React
   const colorClass = color === 'cyan' ? 'text-neon-cyan' : color === 'pink' ? 'text-neon-pink' : 'text-neutral-400'
   return (
     <Link 
-      to={to as any} 
+      to={to} 
       onClick={onClick}
       className={`w-full flex items-center gap-4 p-4 hover:bg-white/3 transition-all group skew-x--5 ${colorClass}`}
     >

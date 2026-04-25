@@ -110,7 +110,7 @@ function DashboardPage() {
                 user={user} 
                 deferredStats={deferredStats} 
                 deferredDonations={deferredDonations} 
-                isStakingEnabled={(wallet as any).isStakingEnabled}
+                isStakingEnabled={(wallet).isStakingEnabled}
                 key="overview" 
               />
             )}
@@ -120,7 +120,7 @@ function DashboardPage() {
               <WalletSettingsView 
                 key="settings" 
                 initialAddress={wallet.payoutAddress} 
-                initialStaking={(wallet as any).isStakingEnabled} 
+                initialStaking={(wallet).isStakingEnabled} 
               />
             )}
           </AnimatePresence>

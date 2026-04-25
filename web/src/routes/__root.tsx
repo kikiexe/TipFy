@@ -10,7 +10,8 @@ import TanStackQueryDevtools from '../integrations/tanstack-query/devtools'
 
 import appCss from '../styles.css?url'
 
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
+import type { QueryClient} from '@tanstack/react-query';
+import { QueryClientProvider } from '@tanstack/react-query'
 import { Web3Provider } from '../integrations/wagmi/root-provider'
 
 interface MyRouterContext {

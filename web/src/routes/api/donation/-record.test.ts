@@ -1,6 +1,13 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { verifyMonadTransaction } from '#/lib/monad-utils'
 
+// We need to import the route handler, but since it's a TanStack Start route,
+// it might be tricky to test directly without the full environment.
+// For TDD, let's assume we can mock the request and call the handler if we had access.
+// Since TanStack Start routes are exported as part of Route, we'll try to access the POST handler.
+
+import { Route } from './record'
+
 // Mock dependencies
 vi.mock('#/db/index', () => ({
   db: {
@@ -36,13 +43,6 @@ vi.mock('ably', () => ({
     })),
   },
 }))
-
-// We need to import the route handler, but since it's a TanStack Start route,
-// it might be tricky to test directly without the full environment.
-// For TDD, let's assume we can mock the request and call the handler if we had access.
-// Since TanStack Start routes are exported as part of Route, we'll try to access the POST handler.
-
-import { Route } from './record'
 
 describe('POST /api/donation/record', () => {
   const postHandler = (Route.options.server as any).handlers.POST

@@ -102,7 +102,7 @@ export const OverlayEditor = ({
         const { isEnabled, ...config } = value
 
         // Save to overlayConfigs
-        await (saveOverlayConfigServerFn as any)({
+        await saveOverlayConfigServerFn({
           data: {
             type,
             config,
@@ -114,7 +114,7 @@ export const OverlayEditor = ({
         if (type === 'VOTING') {
           const { startDate, startTime, endDate, endTime, title, options } =
             config
-          await (saveVotingServerFn as any)({
+          await saveVotingServerFn({
             data: { startDate, startTime, endDate, endTime, title, options },
           })
         }

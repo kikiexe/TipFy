@@ -42,7 +42,7 @@ export const CommandCenter = ({
 
   // --- Contract Reads ---
   const { data: vaultBalance } = useReadContract({
-    address: TIPFY_VAULT_ADDRESS as `0x${string}`,
+    address: TIPFY_VAULT_ADDRESS,
     abi: TipFyVaultABI,
     functionName: 'balances',
     args: [address as `0x${string}`],
@@ -50,7 +50,7 @@ export const CommandCenter = ({
   })
 
   const { data: accruedYield } = useReadContract({
-    address: TIPFY_VAULT_ADDRESS as `0x${string}`,
+    address: TIPFY_VAULT_ADDRESS,
     abi: TipFyVaultABI,
     functionName: 'calculateYield',
     args: [address as `0x${string}`],
@@ -58,7 +58,7 @@ export const CommandCenter = ({
   })
 
   const { data: lastStakeTime } = useReadContract({
-    address: TIPFY_VAULT_ADDRESS as `0x${string}`,
+    address: TIPFY_VAULT_ADDRESS,
     abi: TipFyVaultABI,
     functionName: 'lastStakeTimestamp',
     args: [address as `0x${string}`],
@@ -66,7 +66,7 @@ export const CommandCenter = ({
   })
 
   const { data: stakeDuration } = useReadContract({
-    address: TIPFY_VAULT_ADDRESS as `0x${string}`,
+    address: TIPFY_VAULT_ADDRESS,
     abi: TipFyVaultABI,
     functionName: 'STAKE_DURATION',
     query: { enabled: !!isStakingEnabled }
@@ -82,7 +82,7 @@ export const CommandCenter = ({
       return
     }
     writeContract({
-      address: TIPFY_VAULT_ADDRESS as `0x${string}`,
+      address: TIPFY_VAULT_ADDRESS,
       abi: TipFyVaultABI,
       functionName: 'withdraw',
       args: [vaultBalance],
@@ -91,7 +91,7 @@ export const CommandCenter = ({
 
   const handleClaimYield = () => {
     writeContract({
-      address: TIPFY_VAULT_ADDRESS as `0x${string}`,
+      address: TIPFY_VAULT_ADDRESS,
       abi: TipFyVaultABI,
       functionName: 'claimYield',
     })
@@ -142,7 +142,7 @@ export const CommandCenter = ({
         <div className="flex gap-4">
           {user?.slug && (
             <Link
-              to={`/u/${user.slug}` as any}
+              to={`/u/${user.slug}`}
               className="px-6 py-3 bg-white/5 border border-white/10 hover:border-neon-cyan/50 transition-all uppercase text-[10px] font-black tracking-[0.2em] flex items-center gap-2 skew-x--10"
             >
               <span className="skew-x-10 flex items-center gap-2">
@@ -203,7 +203,7 @@ export const CommandCenter = ({
                         Vault_Balance
                       </p>
                       <p className="text-4xl font-black text-white italic">
-                        {vaultBalance ? formatEther(vaultBalance as bigint) : '0.00'}{' '}
+                        {vaultBalance ? formatEther(vaultBalance) : '0.00'}{' '}
                         <span className="text-xs text-neutral-500 not-italic uppercase">
                           MON
                         </span>
@@ -215,7 +215,7 @@ export const CommandCenter = ({
                         Accrued_Yield
                       </p>
                       <p className="text-4xl font-black text-green-500 italic">
-                        +{accruedYield ? formatEther(accruedYield as bigint) : '0.00'}{' '}
+                        +{accruedYield ? formatEther(accruedYield) : '0.00'}{' '}
                         <span className="text-xs text-neutral-500 not-italic uppercase">
                           MON
                         </span>

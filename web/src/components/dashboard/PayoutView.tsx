@@ -28,7 +28,7 @@ export const PayoutView = ({
         // 1. Update Smart Contract if status changed
         if (value.isStakingEnabled !== initialStaking) {
           writeContract({
-            address: TIPFY_VAULT_ADDRESS as `0x${string}`,
+            address: TIPFY_VAULT_ADDRESS,
             abi: TipFyVaultABI,
             functionName: 'toggleStaking',
             args: [value.isStakingEnabled],

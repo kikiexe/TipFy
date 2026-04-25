@@ -1,7 +1,8 @@
 import { WagmiProvider, createConfig, http } from 'wagmi'
 import { mainnet, monadTestnet } from 'wagmi/chains'
 import { ConnectKitProvider, getDefaultConfig } from 'connectkit'
-import { useEffect, type ReactNode } from 'react'
+import { useEffect  } from 'react'
+import type {ReactNode} from 'react';
 
 const projectId =
   import.meta.env.VITE_WC_PROJECT_ID || '49cc0f94fd76627001ad0ff75091fb9c'
