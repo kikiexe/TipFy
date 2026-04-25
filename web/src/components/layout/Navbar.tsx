@@ -51,7 +51,7 @@ export const Navbar = () => {
 function NavLink({ to, icon, label }: { to: string; icon: React.ReactNode; label: string }) {
   return (
     <Link 
-      to={to as any} 
+      to={to} 
       className="flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.3em] text-neutral-500 hover:text-neon-cyan transition-all [&.active]:text-neon-cyan"
     >
       {icon} {label}

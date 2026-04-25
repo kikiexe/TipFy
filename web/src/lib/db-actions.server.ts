@@ -138,7 +138,7 @@ export async function checkProfileExistence() {
     return { 
       isAuthenticated: true, 
       hasProfile: !!userProfile, 
-      walletAddress: res.walletAddress as string,
+      walletAddress: res.walletAddress,
       slug: userProfile?.slug
     }
   } catch (e) {

@@ -100,7 +100,7 @@ export const OverlayEditor = ({
         const { isEnabled, ...config } = value
 
         // Save to overlayConfigs
-        await (saveOverlayConfigServerFn as any)({
+        await saveOverlayConfigServerFn({
           data: {
             type,
             config,

@@ -55,7 +55,7 @@ function PublicProfilePage() {
     try {
       await (submitVoteServerFn as any)({
         data: {
-          votingId: (activeVoting as any).id,
+          votingId: (activeVoting).id,
           optionIndex: index,
           voterAddress: senderAddress,
         },
@@ -105,7 +105,7 @@ function PublicProfilePage() {
     if (profile.isStakingEnabled) {
       console.log(`[Tipping] Routing to Vault: ${TIPFY_VAULT_ADDRESS} (Staking: true)`)
       writeContract({
-        address: TIPFY_VAULT_ADDRESS as `0x${string}`,
+        address: TIPFY_VAULT_ADDRESS,
         abi: TipFyVaultABI,
         functionName: 'donate',
         args: [
@@ -193,7 +193,7 @@ function PublicProfilePage() {
                     <div className="w-2 h-2 rounded-full bg-neon-cyan animate-pulse" />
                     <span className="text-[10px] font-black uppercase tracking-[0.4em] text-neon-cyan">Active_Poll_Session</span>
                   </div>
-                  <h3 className="text-3xl font-black italic uppercase tracking-tighter text-white">{(activeVoting as any).title}</h3>
+                  <h3 className="text-3xl font-black italic uppercase tracking-tighter text-white">{activeVoting.title}</h3>
                 </div>
                 <div className="bg-white/5 border border-white/10 px-4 py-2 skew-x--10">
                   <p className="text-[10px] font-black uppercase text-neutral-400 skew-x-10">Status: In_Progress</p>
@@ -201,7 +201,7 @@ function PublicProfilePage() {
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {((activeVoting as any).options as string[]).map((option, idx) => (
+                {(activeVoting.options as string[]).map((option, idx) => (
                   <button
                     key={idx}
                     onClick={() => handleVote(idx)}
