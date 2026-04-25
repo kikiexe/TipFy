@@ -153,6 +153,7 @@ export async function checkProfileExistence() {
       slug: userProfile?.slug
     }
   } catch (e) {
+    console.error('[DB Error] checkProfileExistence failed:', e);
     return { isAuthenticated: false, hasProfile: false }
   }
 }
