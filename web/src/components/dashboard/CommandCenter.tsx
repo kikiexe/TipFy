@@ -20,10 +20,9 @@ import { Link, Await } from '@tanstack/react-router'
 import { Suspense, useMemo } from 'react'
 import { useAccount, useReadContract, useWriteContract, useWaitForTransactionReceipt } from 'wagmi'
 import { formatEther } from 'viem'
-import { TipFyVaultABI } from '../../lib/TipFyVaultABI'
+import { TipFyVaultABI, TIPFY_VAULT_ADDRESS } from '../../lib/TipFyVaultABI'
 
-// Update with real deployed address
-const TIPFY_VAULT_ADDRESS = '0x0000000000000000000000000000000000000000'
+// Address is now imported from TipFyVaultABI.ts
 
 interface CommandCenterProps {
   user: any

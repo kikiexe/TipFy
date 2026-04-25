@@ -4,6 +4,7 @@ import {
   getActiveVotingServerFn,
   submitVoteServerFn,
 } from '../lib/overlay-utils'
+import { TipFyVaultABI, TIPFY_VAULT_ADDRESS } from '../lib/TipFyVaultABI'
 import { GlitchText } from '../components/ui/GlitchText'
 import { Navbar } from '../components/layout/Navbar'
 import { Footer } from '../components/layout/Footer'
@@ -19,7 +20,7 @@ import {
 } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useState, useEffect, useRef } from 'react'
-import { useSendTransaction, useWaitForTransactionReceipt, useAccount } from 'wagmi'
+import { useSendTransaction, useWriteContract, useWaitForTransactionReceipt, useAccount } from 'wagmi'
 import { parseEther } from 'viem'
 
 export const Route = createFileRoute('/u/$username')({
@@ -68,13 +69,18 @@ function PublicProfilePage() {
     }
   }
 
-  const { data: hash, sendTransaction, isPending, error } = useSendTransaction()
+  const { data: hash, sendTransaction, isPending: isSendingTx, error: sendError } = useSendTransaction()
+  const { data: writeHash, writeContract, isPending: isWritingContract, error: writeError } = useWriteContract()
+
+  const currentHash = hash || writeHash
+  const isPending = isSendingTx || isWritingContract
+  const error = sendError || writeError
 
   const { isLoading: isConfirming, isSuccess: isConfirmed } = 
-    useWaitForTransactionReceipt({ hash })
+    useWaitForTransactionReceipt({ hash: currentHash })
 
   useEffect(() => {
-    if (isConfirmed && hash && !hasRecorded.current) {
+    if (isConfirmed && currentHash && !hasRecorded.current) {
       hasRecorded.current = true
       fetch('/api/donation/record', {
         method: 'POST',
@@ -83,31 +89,41 @@ function PublicProfilePage() {
           slug: profile.username,
           senderAddress,
           amount,
-          txHash: hash,
+          txHash: currentHash,
           message
         })
       }).catch(err => console.error('Failed to record donation:', err))
     }
-  }, [isConfirmed, hash, profile.username, senderAddress, amount, message])
+  }, [isConfirmed, currentHash, profile.username, senderAddress, amount, message])
 
-  // TipFyVault Smart Contract Address (Update this after deployment)
-  const TIPFY_VAULT_ADDRESS = '0x0000000000000000000000000000000000000000'
+  // TipFyVault Smart Contract Address is now imported from TipFyVaultABI.ts
 
   const handleTip = async () => {
     if (!isConnected || !profile.walletAddress) return
     hasRecorded.current = false
 
-    // Smart Routing Logic
-    const targetAddress = profile.isStakingEnabled 
-      ? TIPFY_VAULT_ADDRESS 
-      : (profile.payoutAddress || profile.walletAddress)
-
-    console.log(`[Tipping] Routing to: ${targetAddress} (Staking: ${profile.isStakingEnabled})`)
-
-    sendTransaction({
-      to: targetAddress as `0x${string}`,
-      value: parseEther(amount),
-    })
+    if (profile.isStakingEnabled) {
+      console.log(`[Tipping] Routing to Vault: ${TIPFY_VAULT_ADDRESS} (Staking: true)`)
+      writeContract({
+        address: TIPFY_VAULT_ADDRESS as `0x${string}`,
+        abi: TipFyVaultABI,
+        functionName: 'donate',
+        args: [
+          (profile.payoutAddress || profile.walletAddress) as `0x${string}`,
+          'Anon', // Placeholder nickname or use state if available
+          message || 'Support',
+          '', // Media URL
+        ],
+        value: parseEther(amount),
+      })
+    } else {
+      const targetAddress = (profile.payoutAddress || profile.walletAddress)
+      console.log(`[Tipping] Routing Direct P2P to: ${targetAddress} (Staking: false)`)
+      sendTransaction({
+        to: targetAddress as `0x${string}`,
+        value: parseEther(amount),
+      })
+    }
   }
 
   return (
@@ -229,7 +245,7 @@ function PublicProfilePage() {
                 </div>
                 <div>
                   <h3 className="text-2xl font-black italic uppercase tracking-tighter text-white">Transmission_Successful</h3>
-                  <p className="text-neutral-500 text-[10px] font-black uppercase tracking-[0.4em] mt-2">Transaction Hash: {hash?.slice(0,10)}...{hash?.slice(-8)}</p>
+                  <p className="text-neutral-500 text-[10px] font-black uppercase tracking-[0.4em] mt-2">Transaction Hash: {currentHash?.slice(0,10)}...{currentHash?.slice(-8)}</p>
                 </div>
                 <NeonButton variant="cyan" onClick={() => window.location.reload()} className="mx-auto">
                   Send_Another_Support

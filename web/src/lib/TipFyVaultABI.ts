@@ -277,3 +277,5 @@ export const TipFyVaultABI = [
   },
   { stateMutability: 'payable', type: 'receive' },
 ] as const
+
+export const TIPFY_VAULT_ADDRESS = '0x1be88627d42a8b583cfab2cd110196e8216ddb8d' as const

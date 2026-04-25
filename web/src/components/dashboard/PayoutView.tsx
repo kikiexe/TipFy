@@ -3,10 +3,9 @@ import { updatePayoutSettingsServerFn } from '../../lib/payout-utils'
 import { Wallet, ShieldCheck, Loader2 } from 'lucide-react'
 import { useState } from 'react'
 import { useWriteContract, useWaitForTransactionReceipt } from 'wagmi'
-import { TipFyVaultABI } from '../../lib/TipFyVaultABI'
+import { TipFyVaultABI, TIPFY_VAULT_ADDRESS } from '../../lib/TipFyVaultABI'
 
-// Update with real deployed address
-const TIPFY_VAULT_ADDRESS = '0x0000000000000000000000000000000000000000'
+// Address is now imported from TipFyVaultABI.ts
 
 export const PayoutView = ({
   initialAddress,
