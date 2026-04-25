@@ -35,6 +35,7 @@ contract TipFyVault is Ownable, ReentrancyGuard {
     mapping(address => uint256) public balances;
     mapping(address => uint256) public lastStakeTimestamp;
     mapping(address => uint256) public unclaimedYield;
+    uint256 public totalStreamerBalances;
 
     uint256 public platformYieldBalance;
 
@@ -109,9 +110,6 @@ contract TipFyVault is Ownable, ReentrancyGuard {
         uint256 feeAmount = (msg.value * platformFeeBps) / 10_000;
         uint256 streamerShare = msg.value - feeAmount;
 
-        // Track platform fee
-        platformYieldBalance += feeAmount;
-
         // Transfer fee to platform owner (optional: keep in contract if staking fee too?)
         // For now, keep as is but we have accounting.
         (bool feeSuccess, ) = payable(owner()).call{value: feeAmount}("");
@@ -133,6 +131,7 @@ contract TipFyVault is Ownable, ReentrancyGuard {
             }
             lastStakeTimestamp[_streamer] = block.timestamp;
             balances[_streamer] += streamerShare;
+            totalStreamerBalances += streamerShare;
         } else {
             // Direct transfer
             (bool streamerSuccess, ) = _streamer.call{value: streamerShare}("");
@@ -159,6 +158,7 @@ contract TipFyVault is Ownable, ReentrancyGuard {
         lastStakeTimestamp[msg.sender] = block.timestamp;
 
         balances[msg.sender] -= _amount;
+        totalStreamerBalances -= _amount;
 
         // Jika saldo habis, reset timestamp
         if (balances[msg.sender] == 0) {
@@ -211,16 +211,22 @@ contract TipFyVault is Ownable, ReentrancyGuard {
     }
 
     // Fungsi untuk platform owner menarik sisa yield dari Aave
-    function withdrawPlatformYield(uint256 _amount) external onlyOwner {
-        require(_amount <= platformYieldBalance, "Insufficient platform yield balance");
+    function withdrawPlatformYield() external onlyOwner nonReentrant {
+        // Tarik seluruh dana di Aave (pokok + bunga) menjadi WMON
+        uint256 currentWmon = aavePool.withdraw(address(wmon), type(uint256).max, address(this));
         
-        platformYieldBalance -= _amount;
+        // Bunga aktual Aave = Total yang didapat - Kewajiban pokok ke Streamer
+        require(currentWmon > totalStreamerBalances, "No excess yield available");
+        uint256 platformYield = currentWmon - totalStreamerBalances;
         
-        aavePool.withdraw(address(wmon), _amount, address(this));
-        wmon.withdraw(_amount);
-
-        (bool success, ) = payable(owner()).call{value: _amount}("");
-        if (!success) revert TransferFailed();
+        // Kembalikan kewajiban pokok streamer ke Aave
+        wmon.approve(address(aavePool), totalStreamerBalances);
+        aavePool.supply(address(wmon), totalStreamerBalances, address(this), 0);
+        
+        // Cairkan bunga tersebut ke Owner
+        wmon.withdraw(platformYield);
+        (bool success, ) = payable(owner()).call{value: platformYield}("");
+        require(success, "Transfer Failed");
     }
     
     receive() external payable {}
