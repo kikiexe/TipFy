@@ -1,6 +1,6 @@
 # LeMon - TipFy Protocol 🍋
 
-[![Vercel Deployment](https://img.shields.io/badge/Vercel-Deployed-success?style=flat&logo=vercel)](https://vercel.com)
+[![Vercel Deployment](https://img.shields.io/badge/Vercel-Deployed-success?style=flat&logo=vercel)](https://tipfy-dyxp.vercel.app/)
 [![Monad Testnet](https://img.shields.io/badge/Network-Monad%20Testnet-blue)](https://monad.xyz)
 [![Solidity](https://img.shields.io/badge/Solidity-0.8.20-black?logo=solidity)](https://soliditylang.org/)
 [![Stack](https://img.shields.io/badge/Stack-TanStack%20Start-FF4154?logo=react)](https://tanstack.com/start)
@@ -92,9 +92,9 @@ VITE_WC_PROJECT_ID=
 
 | Contract | Address |
 | :--- | :--- |
-| **TipFyVault** | `0x1BE88627D42A8b583cFab2cD110196e8216dDB8D` |
-| **MockWMON** | `0xEFeA2880F52F845cB6A5a7bAfbBe74ec67b38606` |
-| **MockAavePool** | `0xA4A69E91994a788375537171620650A6D7FF4b08` |
+| **TipFyVault** | `0x1be88627d42a8b583cfab2cd110196e8216ddb8d` |
+| **MockWMON** | `0xefea2880f52f845cb6a5a7bafbbe74ec67b38606` |
+| **MockAavePool** | `0xa4a69e91994a788375537171620650a6d7ff4b08` |
 
 ---
 
