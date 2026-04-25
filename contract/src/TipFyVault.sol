@@ -34,12 +34,14 @@ contract TipFyVault is Ownable, ReentrancyGuard {
     mapping(address => bool) public isStakingEnabled;
     mapping(address => uint256) public balances;
     mapping(address => uint256) public lastStakeTimestamp;
+    mapping(address => uint256) public unclaimedYield;
+
+    uint256 public platformYieldBalance;
 
     IPool public aavePool;
     IWETH public wmon;
 
     uint256 public constant YIELD_APR = 350; // 3.5% (350 basis points)
-    uint256 public constant STAKE_DURATION = 365 days;
 
     // =========================================================
     //  EVENTS
@@ -107,7 +109,11 @@ contract TipFyVault is Ownable, ReentrancyGuard {
         uint256 feeAmount = (msg.value * platformFeeBps) / 10_000;
         uint256 streamerShare = msg.value - feeAmount;
 
-        // Transfer fee to platform owner
+        // Track platform fee
+        platformYieldBalance += feeAmount;
+
+        // Transfer fee to platform owner (optional: keep in contract if staking fee too?)
+        // For now, keep as is but we have accounting.
         (bool feeSuccess, ) = payable(owner()).call{value: feeAmount}("");
         if (!feeSuccess) revert TransferFailed();
 
@@ -121,15 +127,11 @@ contract TipFyVault is Ownable, ReentrancyGuard {
             wmon.approve(address(aavePool), streamerShare);
             aavePool.supply(address(wmon), streamerShare, address(this), 0);
 
-            // Update balances & timestamp (weighted average concept simplified to reset on first deposit or update)
-            if (balances[_streamer] == 0) {
-                lastStakeTimestamp[_streamer] = block.timestamp;
-            } else {
-                // Weighted average lock time
-                uint256 oldBalance = balances[_streamer];
-                uint256 oldTimestamp = lastStakeTimestamp[_streamer];
-                lastStakeTimestamp[_streamer] = ((oldBalance * oldTimestamp) + (streamerShare * block.timestamp)) / (oldBalance + streamerShare);
+            // Update balances & timestamp with pro-rata accrual
+            if (balances[_streamer] > 0) {
+                unclaimedYield[_streamer] += _calculateNewYield(_streamer);
             }
+            lastStakeTimestamp[_streamer] = block.timestamp;
             balances[_streamer] += streamerShare;
         } else {
             // Direct transfer
@@ -152,6 +154,10 @@ contract TipFyVault is Ownable, ReentrancyGuard {
     function withdraw(uint256 _amount) external nonReentrant {
         if (balances[msg.sender] < _amount) revert InsufficientBalance();
 
+        // Accrue yield before balance changes
+        unclaimedYield[msg.sender] += _calculateNewYield(msg.sender);
+        lastStakeTimestamp[msg.sender] = block.timestamp;
+
         balances[msg.sender] -= _amount;
 
         // Jika saldo habis, reset timestamp
@@ -173,25 +179,25 @@ contract TipFyVault is Ownable, ReentrancyGuard {
     }
 
     function calculateYield(address _streamer) public view returns (uint256) {
+        return unclaimedYield[_streamer] + _calculateNewYield(_streamer);
+    }
+
+    function _calculateNewYield(address _streamer) internal view returns (uint256) {
         if (balances[_streamer] == 0 || lastStakeTimestamp[_streamer] == 0) return 0;
         
         uint256 timeStaked = block.timestamp - lastStakeTimestamp[_streamer];
-        if (timeStaked < STAKE_DURATION) return 0; // Harus 1 tahun penuh
-
-        // APR 3.5%
-        return (balances[_streamer] * YIELD_APR) / 10_000;
+        
+        // Annual Yield = (Balance * APR) / 10000
+        // Pro-rata Yield = (Annual Yield * timeStaked) / 365 days
+        return (balances[_streamer] * YIELD_APR * timeStaked) / (10_000 * 365 days);
     }
 
     function claimYield() external nonReentrant {
         uint256 yieldAmount = calculateYield(msg.sender);
         if (yieldAmount == 0) revert YieldNotReady();
 
-        // Di arsitektur ini, yield yang dibayarkan ke streamer berasal dari 
-        // akumulasi yield Aave yang ada di dalam balance kontrak ini (aToken).
-        // Kita asumsikan yield Aave melebihi 3.5% sehingga cukup untuk membayar.
-
-        // Update timestamp agar tidak bisa claim 2x untuk tahun yang sama
-        // atau kita reset ke block.timestamp agar harus nunggu 1 tahun lagi
+        // Reset tracking
+        unclaimedYield[msg.sender] = 0;
         lastStakeTimestamp[msg.sender] = block.timestamp;
 
         // Withdraw yield amount from Aave
@@ -206,6 +212,10 @@ contract TipFyVault is Ownable, ReentrancyGuard {
 
     // Fungsi untuk platform owner menarik sisa yield dari Aave
     function withdrawPlatformYield(uint256 _amount) external onlyOwner {
+        require(_amount <= platformYieldBalance, "Insufficient platform yield balance");
+        
+        platformYieldBalance -= _amount;
+        
         aavePool.withdraw(address(wmon), _amount, address(this));
         wmon.withdraw(_amount);
 
